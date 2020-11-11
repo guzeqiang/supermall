@@ -1,7 +1,6 @@
 <template>
   <div id="detail">
     <div class="detail-scroll">
-      <!--      <demo/>-->
       <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav"/>
       <scroll class="detail-content" :pull-up-load="true" ref="scroll" :probe-type="3" @scroll="contentScroll">
         <detail-swiper :top-images="topImages"/>
