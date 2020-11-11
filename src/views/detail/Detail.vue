@@ -11,6 +11,8 @@
         <detail-comment-info ref="comment" :comment-info="commentInfo"/>
         <goods-list :goods="recommends" ref="recommends"/>
       </scroll>
+      <detail-bottom-bar />
+      <back-top @click.native="backClick" v-show="isShowBackTop"/>
     </div>
   </div>
 </template>
@@ -29,7 +31,8 @@
 
   import {getDetail, Goods, Shop, GoodsParam, getRecommend} from "network/detail"
   import {debounce} from "common/utils"
-  import {itemListenerMixin} from "common/mixin";
+  import {itemListenerMixin, backTopMixin} from "common/mixin"
+  import DetailBottomBar from "views/detail/childComps/DetailBottomBar"
 
 
   export default {
@@ -47,10 +50,11 @@
         itemImgListener: [],
         themeTopYs: [],
         getThemeTopY: null,
-        currentIndex: 0
+        currentIndex: 0,
+
       }
     },
-    mixins: [itemListenerMixin],
+    mixins: [itemListenerMixin, backTopMixin],
     methods: {
       imageLoad() {
         this.newRefresh();
@@ -59,6 +63,7 @@
       titleClick(index) {
         this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 200)
       },
+
       contentScroll(position) {
         const positionY = -position.y;
         let length = this.themeTopYs.length;
@@ -68,7 +73,7 @@
             this.$refs.nav.currentIndex = this.currentIndex;
           }
         }
-
+        this.isShowBackTop = (-position.y) > 1000;
       }
     },
     components: {
@@ -80,7 +85,8 @@
       DetailGoodsInfo,
       DetailParamInfo,
       DetailCommentInfo,
-      GoodsList
+      GoodsList,
+      DetailBottomBar
     },
     created() {
       this.iid = this.$route.params.iid;
@@ -134,6 +140,6 @@
 
   .detail-content {
     margin-top: 44px;
-    height: calc(100% - 44px);
+    height: calc(100% - 44px - 49px);
   }
 </style>
