@@ -11,7 +11,7 @@
         <detail-comment-info ref="comment" :comment-info="commentInfo"/>
         <goods-list :goods="recommends" ref="recommends"/>
       </scroll>
-      <detail-bottom-bar />
+      <detail-bottom-bar @addCart="addToCart"/>
       <back-top @click.native="backClick" v-show="isShowBackTop"/>
     </div>
   </div>
@@ -34,6 +34,8 @@
   import {itemListenerMixin, backTopMixin} from "common/mixin"
   import DetailBottomBar from "views/detail/childComps/DetailBottomBar"
 
+  import Toast from "components/common/toast/Toast"
+
 
   export default {
     name: "Detail",
@@ -51,29 +53,65 @@
         themeTopYs: [],
         getThemeTopY: null,
         currentIndex: 0,
+        test: []
 
       }
     },
     mixins: [itemListenerMixin, backTopMixin],
     methods: {
+      getThemeTop() {
+        this.getThemeTopY = debounce(() => {
+          this.themeTopYs = [];
+          this.themeTopYs.push(0);
+          this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+          this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+          this.themeTopYs.push(this.$refs.recommends.$el.offsetTop);
+        }, 100)
+      },
       imageLoad() {
         this.newRefresh();
         this.getThemeTopY();
       },
       titleClick(index) {
-        this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 200)
-      },
+        this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 200);
 
+      },
       contentScroll(position) {
         const positionY = -position.y;
         let length = this.themeTopYs.length;
-        for (let i = 0; i < length; i++) {
-          if (this.currentIndex !== i && ((i < length - 1 && positionY > this.themeTopYs[i] && positionY < this.themeTopYs[i + 1]) || (i === length - 1 && positionY > this.themeTopYs[i]))) {
+        for (let i = 0; i < length - 1; i++) {
+          if (
+              this.currentIndex !== i &&
+              i < length - 1 &&
+              positionY >= this.themeTopYs[i] &&
+              positionY < this.themeTopYs[i + 1]
+          ) {
             this.currentIndex = i;
             this.$refs.nav.currentIndex = this.currentIndex;
           }
         }
+
+        // for (let i = 0; i < length; i++) {
+        //
+        //   if (this.currentIndex !== i && ((i < length - 1 && positionY >= this.themeTopYs[i] && positionY <= this.themeTopYs[i + 1]) || (i === length - 1 && positionY >= this.themeTopYs[i]))) {
+        //     this.currentIndex = i;
+        //     this.$refs.nav.currentIndex = this.currentIndex;
+        //
+        //   }
+        // }
         this.isShowBackTop = (-position.y) > 1000;
+      },
+      addToCart() {
+        const product = {};
+        product.image = this.topImages[0];
+        product.title = this.goods.title;
+        product.desc = this.goods.desc;
+        product.price = this.goods.realPrice;
+        product.iid = this.iid;
+        // this.$store.commit('addCart', product);
+        this.$store.dispatch('addCart', product).then(res => {
+          this.$toast.show(res, 2000);
+        });
       }
     },
     components: {
@@ -97,7 +135,7 @@
         this.shop = new Shop(res.result.shopInfo);
         this.detailInfo = res.result.detailInfo;
         this.paramInfo = new GoodsParam(res.result.itemParams.info, res.result.itemParams.rule);
-        if (res.result.cRate !== 0) {
+        if (res.result.rate.cRate !== 0) {
           this.commentInfo = res.result.rate.list[0];
           // console.log(this.commentInfo);
         }
@@ -108,15 +146,10 @@
         // console.log(this.recommends);
       })
 
-      this.getThemeTopY = debounce(() => {
-        this.themeTopYs = [];
-        this.themeTopYs.push(0);
-        this.themeTopYs.push(this.$refs.params.$el.offsetTop);
-        this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
-        this.themeTopYs.push(this.$refs.recommends.$el.offsetTop);
-      }, 2000)
+      this.getThemeTop();
     },
     mounted() {
+
     },
     destroyed() {
       // console.log(123)
@@ -129,7 +162,7 @@
     position: relative;
     height: 100vh;
     background-color: #ffffff;
-    z-index: 999;
+    z-index: 12;
   }
 
   .detail-nav {

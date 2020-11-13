@@ -14,7 +14,7 @@
       <tab-bar-item path="/set">
         <img slot="item-icon" src="~assets/img/tabbar/shezhi.svg"/>
         <img slot="item-icon-active" src="~assets/img/tabbar/shezhi-active.svg"/>
-        <div slot="item-text">设置</div>
+        <div slot="item-text">购物车</div>
       </tab-bar-item>
       <tab-bar-item path="/user">
         <img slot="item-icon" src="~assets/img/tabbar/geren.svg"/>
